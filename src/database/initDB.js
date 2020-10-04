@@ -16,12 +16,8 @@ try {
   );
 
   // Read and execute schema 
-  const schema = fs.readFileSync('./src/database/schema.sql').toString().split(';');
-  await conn.transaction(conn => {
-    return Promise.all(
-      schema.map((query) => query ?? conn.run(query))
-    );
-  })
+  const schema = fs.readFileSync('./src/database/schema.sql').toString();
+  await conn.exec(schema);
 
   console.log('Database initialized correctly')
 } catch (error) {
