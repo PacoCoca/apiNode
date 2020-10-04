@@ -1,45 +1,33 @@
-import sqlite3 from 'sqlite3';
+import Database from 'sqlite-async';
 import fs from 'fs';
 
-// Create instance folder if it doesn't exist
-const path = './instance';
-if (!fs.existsSync(path)) {
-  fs.mkdirSync(path);
+let conn;
+try {
+  // Create instance folder if it doesn't exist
+  const path = './instance';
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path);
+  }
+
+  // Create connection
+  const conn = await Database.open(
+    `${path}/sqlite.db`,
+    Database.OPEN_READWRITE | Database.OPEN_CREATE
+  );
+
+  // Read and execute schema 
+  const schema = fs.readFileSync('./src/database/schema.sql').toString().split(';');
+  await conn.transaction(conn => {
+    return Promise.all(
+      schema.map((query) => query ?? conn.run(query))
+    );
+  })
+
+  console.log('Database initialized correctly')
+} catch (error) {
+  console.log(error);
+} finally {
+  if (conn) {
+    conn.close();
+  }
 }
-
-// Create connection
-const db = new sqlite3.Database(
-  `${path}/sqlite.db`,
-  sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
-  (err) => {
-    if (err) {
-      console.log(err);
-    }
-  }
-);
-
-// Read and execute schema 
-const schema = fs.readFileSync('./src/database/schema.sql').toString().split(';');
-
-db.serialize(() => {
-  db.run('BEGIN TRANSACTION');
-  schema.forEach((query) => {
-    if (query) {
-      db.run(query, (err) => {
-        if (err) {
-          console.log(err); 
-        }
-      });
-    }
-  });
-  db.run('COMMIT');
-});
-
-// Close the connection
-db.close((err) => {
-  if (err) {
-    console.error(err);
-  } else {
-    console.log('Database initialized correctly')
-  }
-});
