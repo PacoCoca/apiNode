@@ -7,7 +7,8 @@
   "scripts": {
     "start": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "init-db": "node src/database/initDB.js"
+    "init-db": "node src/database/initDB.js",
+    "add-user": "node src/database/addUser.js"
   },
   "repository": {
     "type": "git",
