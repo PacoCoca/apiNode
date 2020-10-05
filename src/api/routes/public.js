@@ -61,7 +61,7 @@ route.delete('/:id', async (req, res) => {
     return;
   }
 
-  const result = await service.update(
+  const result = await service.delete(
     req.params['id']
   );
 
